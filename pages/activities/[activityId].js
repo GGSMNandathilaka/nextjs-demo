@@ -1,16 +1,13 @@
-import { useRouter } from "next/router";
 import { Fragment } from "react";
 
-import { getActivityById } from "../../dummy-data";
 import ActivitySummary from "../../components/activity-detail/activity-summary";
 import ActivityLogistics from "../../components/activity-detail/activity-logistics";
 import ActivityContent from "../../components/activity-detail/activity-content";
 import ErrorAlert from "../../components/ui/error-alert";
+import { getActivityById, getFeaturedActivities } from "../../api-util";
 
-function DetailedActivityPage() {
-  const router = useRouter();
-  const activityId = router.query.activityId;
-  const activity = getActivityById(activityId);
+function DetailedActivityPage(props) {
+  const { activity } = props;
 
   if (!activity) {
     return (
@@ -38,3 +35,23 @@ function DetailedActivityPage() {
 }
 
 export default DetailedActivityPage;
+
+export async function getStaticProps(context) {
+  const activityId = context.params.activityId;
+  const detailedActivity = await getActivityById(activityId);
+
+  return {
+    props: {
+      activity: detailedActivity,
+    },
+  };
+}
+
+export async function getStaticPaths() {
+  const allActivities = await getFeaturedActivities();
+  const paths = allActivities.map((activity) => ({
+    params: { activityId: activity.id },
+  }));
+
+  return { paths: paths, fallback: "blocking" };
+}

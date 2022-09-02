@@ -2,41 +2,16 @@ import { Fragment } from "react";
 import { useRouter } from "next/router";
 import _ from "lodash";
 
-import { getFilteredActivities } from "../../dummy-data";
 import ActivityList from "../../components/activities/activity-list";
 import ResultsTitle from "../../components/activities/results-title";
 import ErrorAlert from "../../components/ui/error-alert";
+import { getFilteredActivities } from "../../api-util";
 
-function FilteredActivityPage() {
+function FilteredActivityPage(props) {
+  const { activities, date } = props;
   const router = useRouter();
-  const filteredData = router.query.slug;
 
-  if (!filteredData) {
-    return <p className="center">Loading...</p>;
-  }
-
-  const filteredYear = filteredData[0];
-  const filteredMonth = filteredData[1];
-
-  if (
-    isNaN(+filteredYear) ||
-    isNaN(+filteredMonth) ||
-    +filteredMonth < 1 ||
-    +filteredMonth > 12
-  ) {
-    return (
-      <ErrorAlert>
-        <p>Invalid filter. Please adjust your values</p>
-      </ErrorAlert>
-    );
-  }
-
-  const filteredActivities = getFilteredActivities({
-    year: +filteredYear,
-    month: +filteredMonth,
-  });
-
-  if (!filteredActivities || filteredActivities.length === 0) {
+  if (!activities || activities.length === 0) {
     return (
       <ErrorAlert>
         <p>No events found for the chose filter !</p>
@@ -44,14 +19,51 @@ function FilteredActivityPage() {
     );
   }
 
-  const date = new Date(+filteredYear, +filteredMonth - 1);
+  const dateObj = new Date(+date.year, +date.month - 1);
 
   return (
     <Fragment>
-      <ResultsTitle date={date}></ResultsTitle>
-      <ActivityList items={filteredActivities}></ActivityList>
+      <ResultsTitle date={dateObj}></ResultsTitle>
+      <ActivityList items={activities}></ActivityList>
     </Fragment>
   );
+}
+
+export async function getServerSideProps(context) {
+  const params = context.params.slug;
+
+  const filteredYear = +params[0];
+  const filteredMonth = +params[1];
+
+  if (
+    isNaN(filteredYear) ||
+    isNaN(filteredMonth) ||
+    filteredYear > 2030 ||
+    filteredYear < 2020 ||
+    filteredMonth < 1 ||
+    filteredMonth > 12
+  ) {
+    return {
+      props: {
+        hasError: true,
+      },
+    };
+  }
+
+  const filteredActivities = await getFilteredActivities({
+    year: filteredYear,
+    month: filteredMonth,
+  });
+
+  return {
+    props: {
+      activities: filteredActivities,
+      date: {
+        year: filteredYear,
+        month: filteredMonth,
+      },
+    },
+  };
 }
 
 export default FilteredActivityPage;

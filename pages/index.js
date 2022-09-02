@@ -1,13 +1,20 @@
+import { getFeaturedActivities } from "../api-util";
 import ActivityList from "../components/activities/activity-list";
-import { getFeaturedActivities } from "../dummy-data";
 
-function FeaturedActivitiesPage() {
-  const featuredActivities = getFeaturedActivities();
+function FeaturedActivitiesPage(props) {
+  const { activities } = props;
   return (
     <div>
-      <ActivityList items={featuredActivities} />
+      <ActivityList items={activities} />
     </div>
   );
 }
 
 export default FeaturedActivitiesPage;
+
+export async function getStaticProps(context) {
+  const featuredActivities = await getFeaturedActivities();
+  return {
+    props: { activities: featuredActivities },
+  };
+}
