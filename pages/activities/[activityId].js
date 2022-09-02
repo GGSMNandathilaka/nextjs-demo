@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import Head from "next/head";
 
 import ActivitySummary from "../../components/activity-detail/activity-summary";
 import ActivityLogistics from "../../components/activity-detail/activity-logistics";
@@ -19,6 +20,10 @@ function DetailedActivityPage(props) {
 
   return (
     <Fragment>
+      <Head>
+        <title>{activity.title}</title>
+        <meta name="description" content={activity.description}></meta>
+      </Head>
       <ActivitySummary title={activity.title}></ActivitySummary>
       <ActivityLogistics
         date={activity.date}
