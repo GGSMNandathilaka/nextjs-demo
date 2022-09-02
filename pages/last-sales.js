@@ -1,36 +1,38 @@
 import { useState, useEffect } from "react";
+import useSWR from "swr";
 
 function LastSalesPage(props) {
   const url =
     "https://nextjs-demo-bc79f-default-rtdb.firebaseio.com/sales.json";
   const [sales, setSales] = useState(props.sales);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const { data, error } = useSWR(url, (url) =>
+    fetch(url).then((res) => res.json())
+  );
 
   useEffect(() => {
-    setIsLoading(true);
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data) {
-          const transformedSales = [];
-          for (const key in data) {
-            transformedSales.push({
-              id: key,
-              username: data[key].username,
-              volume: data[key].volume,
-            });
-          }
-          setSales(transformedSales);
-          setIsLoading(false);
-        }
-      });
-  }, []);
+    if (data) {
+      const transformedSales = [];
+      for (const key in data) {
+        transformedSales.push({
+          id: key,
+          username: data[key].username,
+          volume: data[key].volume,
+        });
+      }
+      setSales(transformedSales);
+    }
+  }, [data]);
+
+  if (error) {
+    return <p>Failed to load...</p>;
+  }
 
   if (!sales) {
     return <p>No data loaded yet...</p>;
   }
 
-  if (isLoading) {
+  if (!data && !sales) {
     return <p>Loading...</p>;
   }
 
