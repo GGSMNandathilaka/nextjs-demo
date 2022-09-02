@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 function LastSalesPage(props) {
   const url =
-    "https://nextjs-course-790d7-default-rtdb.firebaseio.com/sales.json";
+    "https://nextjs-demo-bc79f-default-rtdb.firebaseio.com/sales.json";
   const [sales, setSales] = useState(props.sales);
   const [isLoading, setIsLoading] = useState(false);
 
